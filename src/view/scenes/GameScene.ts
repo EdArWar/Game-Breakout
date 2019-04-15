@@ -12,6 +12,7 @@ export default class GameScene extends BaseScene {
   public scoreText: Phaser.GameObjects.Text;
   public ball: Phaser.Physics.Arcade.Image;
   public paddle: Phaser.Physics.Arcade.Image;
+  public collisionSound: Phaser.Sound.BaseSound;
   public blocks: any;
   public newBrick: any;
 
@@ -19,14 +20,22 @@ export default class GameScene extends BaseScene {
     super(GameScene.NAME);
   }
 
+  public preload(): void {
+    this.load.audio('collisionSound', 'assets/audios/game.mp3');
+  }
+
   public create(): void {
     this.createBGImage();
     this.createText();
+    this.createSound();
     this.createBall();
     this.createPaddle();
     this.createBlocks();
   }
 
+  public createSound(): void {
+    this.collisionSound = this.sound.add('collisionSound');
+  }
   public createBGImage(): void {
     this.bgImage = this.add.image(
       gameConfig.canvasWidth / 2,
@@ -139,6 +148,7 @@ export default class GameScene extends BaseScene {
 
   public count: number = 0;
   public ballHitBrick(ball: any, block: any): void {
+    this.collisionSound.play();
     block.destroy();
   }
 
