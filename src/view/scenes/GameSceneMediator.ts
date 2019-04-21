@@ -23,6 +23,8 @@ export default class GameSceneMediator extends BaseSceneMediator<GameScene> {
     switch (notificationName) {
       case LobbyScene.PLAY_CLICKED_NOTIFICATION:
         this.game.scene.start(GameScene.NAME);
+        break;
+
       case GameVOProxy.CHENGE_SCORE_NOTIFICATION:
         {
           const gameVOProxy: GameVOProxy = this.facade.retrieveProxy(
@@ -51,10 +53,30 @@ export default class GameSceneMediator extends BaseSceneMediator<GameScene> {
       this.sendBallCollisionBlokNotification,
       this,
     );
+
+    this.viewComponent.events.on(
+      GameScene.GAME_OVER_EVENT,
+      this.sendGameOverNotification,
+      this,
+    );
+
+    this.viewComponent.events.on(
+      GameScene.GAME_OVER_EVENT,
+      this.stopGameScene,
+      this,
+    );
+  }
+
+  private sendGameOverNotification(): void {
+    this.sendNotification(GameScene.GAME_OVER_NOTIFICATION);
   }
 
   private sendBallCollisionBlokNotification(): void {
     this.sendNotification(GameScene.BALL_COLLISION_BLOK_NOTIFICATION);
+  }
+
+  private stopGameScene(): void {
+    this.game.scene.stop(GameScene.NAME);
   }
 
   get playerVOProxy(): PlayerVOProxy {

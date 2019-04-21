@@ -8,13 +8,19 @@ export default class GameScene extends BaseScene {
   public static BALL_COLLISION_BLOK_NOTIFICATION: string = `${
     GameScene.NAME
   }BallCollisionBlokNotification`;
+
+  public static GAME_OVER_EVENT: string = `GameOverEvent`;
+  public static GAME_OVER_NOTIFICATION: string = `${
+    GameScene.NAME
+  }GameOverNotification`;
+
   public bgImage: Phaser.GameObjects.Image;
   public scoreText: Phaser.GameObjects.Text;
   public ball: Phaser.Physics.Arcade.Image;
   public paddle: Phaser.Physics.Arcade.Image;
   public collisionSound: Phaser.Sound.BaseSound;
-  public blocks: any;
-  public newBrick: any;
+  public blocks: Phaser.GameObjects.Group;
+  public newBrick: Phaser.Physics.Arcade.Sprite;
 
   constructor() {
     super(GameScene.NAME);
@@ -71,7 +77,8 @@ export default class GameScene extends BaseScene {
     //sharjvel X Y
     this.ball.setVelocity(500, -500);
     //pater@ chanachel
-    this.ball.setCollideWorldBounds(true);
+    //@ts-ignore
+    this.ball.setCollideWorldBounds(true, true, true, false);
     //otbit linel
     this.ball.setBounce(1);
   }
@@ -125,21 +132,35 @@ export default class GameScene extends BaseScene {
     }
   }
 
-  public update() {
+  public update(time: number, delta: number): void {
+    super.update(time, delta);
+    let min: number = gameConfig.canvasWidth / 4;
+    console.warn('gmpac');
+
     this.physics.collide(this.ball, this.paddle);
     //vor xaxi skzbic lini paddl@ mechtexum
-    this.paddle.x = this.input.x || gameConfig.canvasWidth / 2;
+    if (this.input.x <= min) {
+      this.paddle.x = 0;
+      this.paddle.setOrigin(0, 1);
+      // this.paddle.setCollideWorldBounds(true);
+      // this.paddle.setBounce(1);
+    } else if (this.input.x > gameConfig.canvasWidth - min) {
+      this.paddle.x = gameConfig.canvasWidth;
+      this.paddle.setOrigin(1, 1);
+    } else {
+      this.paddle.x = this.input.x || gameConfig.canvasWidth / 2;
+      this.paddle.setOrigin(0.5, 1);
+    }
 
-    // if (this.ball.y >= gameConfig.canvasHeight - 40) {
-    //   this.ball.setCollideWorldBounds(false);
-
-    //   location.reload();
-    // }
+    if (this.ball.y >= gameConfig.canvasHeight - this.ball.height / 2) {
+      this.events.emit(GameScene.GAME_OVER_EVENT);
+      return;
+    }
 
     //обнаружение столкновений между мячом и кубиками
     this.physics.collide(
       this.ball,
-      this.blocks,
+      this.blocks.getChildren(),
       this.ballHitBrick,
       this.emitSceneClickedEvent,
       this,

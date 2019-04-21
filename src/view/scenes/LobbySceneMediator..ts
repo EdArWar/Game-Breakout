@@ -1,5 +1,6 @@
 import PlayerVOProxy from '../../model/PlayerVOProxy';
 import BaseSceneMediator from './BaseSceneMediator';
+import GameScene from './GameScene';
 import LobbyScene from './LobbyScene';
 import PreloadScene from './PreloadScene';
 
@@ -14,12 +15,14 @@ export default class LobbySceneMediator extends BaseSceneMediator<LobbyScene> {
     this.subscribeToNotifications(
       PreloadScene.LOAD_COMPLETE_NOTIFICATION,
       PlayerVOProxy.INITIALIZE_SUCCESS,
+      GameScene.GAME_OVER_NOTIFICATION,
     );
   }
 
   public handleNotification(notificationName: string): void {
     switch (notificationName) {
       case PreloadScene.LOAD_COMPLETE_NOTIFICATION:
+      case GameScene.GAME_OVER_NOTIFICATION:
         this.game.scene.start(LobbyScene.NAME);
         break;
 
